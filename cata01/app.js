@@ -282,18 +282,24 @@ byId('search-toggle').addEventListener('click', () => {
   setTimeout(() => byId('product-search').focus({ preventScroll: true }), 400);
 });
 
-byId('menu-toggle').addEventListener('click', () => {
-  const el = byId('mobile-menu');
-  el.hidden = !el.hidden;
-  byId('menu-toggle').setAttribute('aria-expanded', String(!el.hidden));
-});
-document.querySelectorAll('#mobile-menu a').forEach(a => a.addEventListener('click', () => {
-  byId('mobile-menu').hidden = true;
-  byId('menu-toggle').setAttribute('aria-expanded', 'false');
-}));
+const mobileMenu = byId('mobile-menu');
+const mobileBackdrop = byId('mobile-menu-backdrop');
+const menuToggle = byId('menu-toggle');
+function setMobileMenu(open) {
+  mobileMenu.hidden = !open;
+  mobileBackdrop.hidden = !open;
+  menuToggle.setAttribute('aria-expanded', String(open));
+  menuToggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+  menuToggle.textContent = open ? '×' : '☰';
+}
+menuToggle.addEventListener('click', () => setMobileMenu(mobileMenu.hidden));
+mobileBackdrop.addEventListener('click', () => setMobileMenu(false));
+document.querySelectorAll('#mobile-menu a').forEach(a => a.addEventListener('click', () => setMobileMenu(false)));
+window.addEventListener('resize', () => { if (window.innerWidth > 780) setMobileMenu(false); });
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
+    setMobileMenu(false);
     if (!byId('product-modal').hidden) closeModal();
     if (byId('cart-drawer').classList.contains('open')) closeDrawer();
   }
